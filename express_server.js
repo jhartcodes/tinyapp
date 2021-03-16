@@ -10,15 +10,23 @@ app.use(bodyParser.urlencoded({extended: true}));
 const generateRandomString = (num) =>  {
   const char = "abcdefghijklmnopqrstuvwxyz0123456789";
   let random = '';
-  for (let i = 0; i < num ; i++) {
-    random += char[Math.floor(Math.random() * char.length)]    
-  };
+  for (let i = 0; i < num; i++) {
+    random += char[Math.floor(Math.random() * char.length)];
+  }
   return random;
 };
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+const users = {
+  'userID':{
+    id:"userID",
+    email: 'user@example.com',
+    password: 'whatisashoe123'
+  },
+}
 
 //ejs route handler for urls
 app.get("/urls", (req, res) => {
@@ -28,10 +36,10 @@ app.get("/urls", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const randomString = generateRandomString(6);
-  let longURL = 'http://'+req.body.longURL;
+  let longURL = 'http://' + req.body.longURL;
   urlDatabase[randomString] = longURL;
   let templateVars = {
-    shortURL: randomString, 
+    shortURL: randomString,
     longURL: longURL
   };
   res.render('urls_show', templateVars);
@@ -47,6 +55,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+//post handler for editing the long URL
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
@@ -54,6 +63,22 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
+});
+
+//post handler for edidint long URL
+app.post("/urls/:shortURL/", (req, res)=>{
+  console.log("req:params.shortUrld", req.params.shortURL);
+  const id = req.params.shortURL;
+  delete urlDatabase[id];
+  res.redirect("/urls/$");
+});
+
+//post handler to delete URLS
+app.post("/urls/:shortURL/update", (req, res)=>{
+  console.log("req:params.update", req.params.shortURL);
+  const id = req.params.shortURL;
+  delete urlDatabase[id];
+  res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
