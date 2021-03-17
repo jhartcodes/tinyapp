@@ -2,12 +2,14 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
-const bodyParser = require("body-parser");
+const bodyParser = require("body-parser");;
+const cookieParser = require('cookie-parser')
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 
 
 //global variables
-const generateRandomString = (num) =>  {
+const generateRandomString = (num) => {
   const char = "abcdefghijklmnopqrstuvwxyz0123456789";
   let random = '';
   for (let i = 0; i < num; i++) {
@@ -20,17 +22,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = {
-  'userID':{
-    id:"userID",
-    email: 'user@example.com',
-    password: 'whatisashoe123'
-  },
-}
+//login/out with res.cookie responses
+app.post("/login", (req, res) => {
+  res.cookie('username', req.body.username)
+  res.redirect('/urls');
+});
+app.post("/logout", (req, res) => {
+  res.clearCookie("username")
+  res.redirect('/urls');
+});
 
 //ejs route handler for urls
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase, username: req.cookies["username"]};
   res.render("urls_index", templateVars);
 });
 
@@ -38,7 +42,7 @@ app.post("/urls", (req, res) => {
   const randomString = generateRandomString(6);
   let longURL = 'http://' + req.body.longURL;
   urlDatabase[randomString] = longURL;
-  let templateVars = {
+  const templateVars = {
     shortURL: randomString,
     longURL: longURL
   };
@@ -46,18 +50,22 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"]};
   res.redirect(templateVars.longURL);
 });
 
 //set new route to submit a new URL
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_new",templateVars);
 });
 
 //post handler for editing the long URL
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"]};
+  
   res.render("urls_show", templateVars);
 });
 
@@ -67,8 +75,6 @@ app.get("/urls.json", (req, res) => {
 
 //post handler for update long URL
 app.post("/urls/:shortURL/update", (req, res)=>{
-  console.log("req:params.shortUrl", req.params.shortURL);
-  console.log("request.body:", req.body)
   const update = req.params.shortURL;
    urlDatabase[update] = req.body.updateURL;
   res.redirect("/urls/");
@@ -76,7 +82,6 @@ app.post("/urls/:shortURL/update", (req, res)=>{
 
 //post handler to delete URLS
 app.post("/urls/:shortURL/delete", (req, res)=>{
-  console.log("req:params.delete", req.params.shortURL);
   const id = req.params.shortURL;
   delete urlDatabase[id];
   res.redirect("/urls");
@@ -85,11 +90,3 @@ app.post("/urls/:shortURL/delete", (req, res)=>{
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-// function generateRandomString() {
-//   let randomstr = string.generate(6)
-//   console.log(randomstr)
-//   return randomstr;
-// } could download random string packa and use.
-
-//this change will show in my feature branch. 
