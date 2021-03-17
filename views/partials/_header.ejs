@@ -13,8 +13,8 @@
     <div class="d-flex justify-content-end">
       <% if (username) { %>
         <form class="form-inline" action="/logout" method="POST">
-          <div style="margin-right: 1em; height: 62px;">
-            <span class="align-middle">Logged In As: <%= username %></span>
+          <div style="margin-right: 1em; height: px; margin-top: 0.1em">
+            <span class="navbar-brand">Logged In As: <%= username %></span>
           </div>
           <button type="submit" class="btn btn-outline-light">Logout</button>
         </form>
