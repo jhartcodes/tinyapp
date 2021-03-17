@@ -65,17 +65,18 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-//post handler for edidint long URL
-app.post("/urls/:shortURL/", (req, res)=>{
-  console.log("req:params.shortUrld", req.params.shortURL);
-  const id = req.params.shortURL;
-  delete urlDatabase[id];
-  res.redirect("/urls/$");
+//post handler for update long URL
+app.post("/urls/:shortURL/update", (req, res)=>{
+  console.log("req:params.shortUrl", req.params.shortURL);
+  console.log("request.body:", req.body)
+  const update = req.params.shortURL;
+   urlDatabase[update] = req.body.updateURL;
+  res.redirect("/urls/");
 });
 
 //post handler to delete URLS
-app.post("/urls/:shortURL/update", (req, res)=>{
-  console.log("req:params.update", req.params.shortURL);
+app.post("/urls/:shortURL/delete", (req, res)=>{
+  console.log("req:params.delete", req.params.shortURL);
   const id = req.params.shortURL;
   delete urlDatabase[id];
   res.redirect("/urls");
