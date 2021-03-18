@@ -26,24 +26,6 @@ const generateRandomString = (num) => {
   }; 
    return null;
  };
-// const doesKeyExist= (key,variable) => {
-//   for (let user in users) {
-//     if (users[user][key] === variable) {
-//       return true;
-//     }
-//   }
-//   return false;
-// }; 
-
-// const email = (email) => {
-//   console.log("tests", email)
-//   for (let user in users) {
-//     if (users[key].email === email) {
-//       return database[user];
-//     }
-//   }
-//   return undefined;
-// };
 
 const users = { 
   "userRandomID": {
@@ -59,8 +41,8 @@ const users = {
 };
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "user2@example.com" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "user2@example.com" }
 };
 
 //login/out with res.cookie responses
@@ -97,11 +79,14 @@ app.get("/urls", (req, res) => {
 
 app.post("/urls", (req, res) => {
   if (req.cookies.user_id) {
-  let short = generateRandomString();
+  let short = generateRandomString(6);
   urlDatabase[short] = { longURL: req.body.longURL, user : req.cookies.user_id }
+  console.log(urlDatabase[short])
   const templateVars = { shortURL: short, longURL: req.body.longURL, user : req.cookies.user_id };
+  console.log(templateVars)
   res.render("urls_show", templateVars);
   } else {
+    res.status(400).send('Must be logged in to make new URL')
     res.redirect('/login')
   }
 });
