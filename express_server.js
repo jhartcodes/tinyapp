@@ -17,25 +17,62 @@ const generateRandomString = (num) => {
   }
   return random;
 };
+// function to check if user exists
+const doesKeyExistInUsers = (key, variable) => {
+  for (let user in users) {
+    if (users[user][key] === variable) {
+      return true;
+    }
+  }
+  return false;
+}; 
+
+const doesEmailExistInUser = (email) =>{
+  for (let id in users){
+    if(users[id].email === email){
+      return id; 
+    }
+  }
+  return false;
+};
+
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+};
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
 //login/out with res.cookie responses
+
+app.get("/login", (req, res) => {
+  const templateVars = { urls: urlDatabase, username: users[req.cookies["user_id"]]}
+  res.render("urls_login", templateVars);
+});
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username)
+  res.cookie("user_id", doesEmailExistInUser(req.body.email))
   res.redirect('/urls');
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username")
+  res.clearCookie("user_id")
   res.redirect('/urls');
 });
 
 //ejs route handler for urls
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"]};
+const templateVars = { urls: urlDatabase, username: users[req.cookies["user_id"]]}
   res.render("urls_index", templateVars);
 });
 
@@ -51,21 +88,21 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"]};
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["user_id"]};
   res.redirect(templateVars.longURL);
 });
 
-//set new route to submit a new URL
+//get new route to submit a new URL
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    username: req.cookies["user_id"],
   };
   res.render("urls_new",templateVars);
 });
 
-//post handler for editing the long URL
+//get handler for editing the long URL
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"]};
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["user_id"]};
   
   res.render("urls_show", templateVars);
 });
@@ -86,6 +123,46 @@ app.post("/urls/:shortURL/delete", (req, res)=>{
   const id = req.params.shortURL;
   delete urlDatabase[id];
   res.redirect("/urls");
+});
+
+//get for registration
+app.get('/register', (req, res) => {
+  const templateVars = {
+  username: req.cookies["username"],
+  }
+  //if already logged in, redirect to /urls
+  if (req.cookies["username"]) {
+    res.redirect('/urls');
+    return;
+  }
+  res.render('registration', templateVars)
+})
+//POST for 
+app.post('/register', (req, res) => {
+   if (doesKeyExistInUsers('email', req.body.email)) {
+    res.status(400)
+    console.log(res.status(400))
+    console.log(res.send(`status code: ${res.statusCode} email already in use`))
+    res.send(`status code: ${res.statusCode} email already in use`);
+    return;
+  }
+  if (req.body.email.length < 1 || req.body.password.length < 1) {
+    res.status(400)
+    res.send(`status code: ${res.statusCode} You must register with a valid Email and password`);
+    return;
+  }
+
+  const userID = generateRandomString(6);
+  // res.cookie(req.cookies["username"])
+  users[userID] = {
+    id: userID,
+    email: req.body.email,
+    password: req.body.password
+  }
+  //  users[userID] =userObj;
+   res.cookie("user_id",userID);
+   console.log(users)
+   return res.redirect("/urls")
 });
 
 app.listen(PORT, () => {
