@@ -18,3 +18,22 @@ const email = (email) => {
   }
   return undefined;
 };
+
+const urlsForUser = function(id, database) {
+  let output = {};
+  for (let url in database) {
+    if (id === database[url].userID) {
+      output[url] = database[url];
+    }
+  }
+  return output;
+};
+
+const generateRandomString = (num) => {
+  const char = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let random = '';
+  for (let i = 0; i < num; i++) {
+    random += char[Math.floor(Math.random() * char.length)];
+  }
+  return random;
+};
