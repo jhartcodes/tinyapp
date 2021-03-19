@@ -39,6 +39,7 @@ const generateRandomString = (num) => {
   return output;
 };
 
+//database Object
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -57,7 +58,7 @@ const urlDatabase = {
   i3BoGr: { longURL: "https://www.google.ca", userID: "userRandomID" }
 };
 
-//login/out with res.cookie responses
+//login/out 
 
 app.post("/login", (req, res) => {
  const user = userLookUpWithEmail(req.body.email)
@@ -81,7 +82,7 @@ app.post("/logout", (req, res) => {
   res.redirect('/urls');
 });
 
-//ejs route handler for urls
+//route handler for urls
 
 app.get("/urls", (req, res) => {
   const currentUserId = req.cookies['user_id'];
@@ -100,7 +101,7 @@ app.post("/urls", (req, res) => {
   res.render('urls_index', templateVars);
   } else {
     res.status(400).send('Must be logged in to make new URL')
-    res.redirect('/login')
+    res.redirect('/login');
   }
 });
 
@@ -109,7 +110,7 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-//get new route to submit a new URL
+
 app.get("/urls/new", (req, res) => {
   const templateVars = {
     user : users[req.cookies["user_id"]]
@@ -117,10 +118,11 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new",templateVars);
 });
 
-//get handler for editing the long URL
+
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: req.cookies["user_id"],cookies: req.cookies};
-  
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.cookies["user_id"]],cookies: req.cookies};
+  console.log(urlDatabase)
+  console.log(req.params.shortURL)
   res.render("urls_show", templateVars);
 });
 
@@ -137,12 +139,17 @@ app.post("/urls/:shortURL/update", (req, res)=>{
 
 //post handler to delete URLS
 app.post("/urls/:shortURL/delete", (req, res)=>{
-  const id = req.params.shortURL;
-  delete urlDatabase[id];
-  res.redirect("/urls");
+  const url = req.params.shortURL
+  const userId = req.cookies["user_id"]
+  if (userId && urlDatabase[url].userID === userId) {
+    delete urlDatabase[url];
+    res.redirect('/urls');
+  } else {
+    res.redirect('/urls')
+  }
 });
 
-//get for registration
+//Registration route
 app.get("/register", (req, res) => {
   const templateVars = {
   user : req.cookies.user_id
