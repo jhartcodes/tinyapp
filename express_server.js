@@ -1,12 +1,19 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const bcrypt = require('bcryptjs')
 app.set("view engine", "ejs");
 const bodyParser = require("body-parser");;
 const cookieParser = require('cookie-parser')
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 
+// bcrypt.genSalt(10)
+//   .then((salt) =>{
+//     console.log('salt',salt)
+//     return bcrypt.hash(plaintextPassword,salt)
+//   })
+//   .then(has)
 
 //global variables
 //randomString variable. 
@@ -61,11 +68,12 @@ const urlDatabase = {
 //login/out 
 
 app.post("/login", (req, res) => {
+ 
  const user = userLookUpWithEmail(req.body.email)
-  if(!user){
+  if(!user) {
   return res.status(403).send('No email found');
   }
-  if(req.body.password !== user["password"]){
+  if(!bcrypt.compareSync(req.body.password, user.password )){
     return res.status(403).send('Incorrect Password');
   }
   res.cookie('user_id', user.id)
@@ -160,16 +168,17 @@ app.get("/register", (req, res) => {
 //POST for registeration page
 app.post("/register", (req, res) => {
   const user = userLookUpWithEmail(req.body.email)
-  console.log(user)
   if (req.body.email === '' || req.body.password === '') {
   return res.status(400).send('Please enter a valid email and password.');
   }
   if (user) {
   return res.status(400).send('This email already exists.');
   };
- 
+  const password = req.body.password
+  const hashedPassword = bcrypt.hashSync(password, 10)
+  console.log(hashedPassword)
   const id = generateRandomString(6);
-  users[id] = { id: id, email: req.body.email, password: req.body.password}
+  users[id] = { id: id, email: req.body.email, password: hashedPassword}
   res.cookie('user_id', id)
   res.redirect("/urls");
 })
