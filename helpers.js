@@ -1,5 +1,4 @@
-//global variables
-//randomString variable. 
+//Function to create random ID# for both Users and URLDatabase
 const generateRandomString = (num) => {
   const char = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let random = '';
@@ -8,26 +7,26 @@ const generateRandomString = (num) => {
   }
   return random;
 };
-// function to check if user exists
- const userLookUpWithEmail = (email, database) => {
-   for(let user in database) {
-    if(email === database[user].email){
-     return database[user];
-   }
-  }; 
-   return null;
- };
- // function to check urls for each user
 
- const urlsForUser = function(id,database) {
+// Function to check if user exists with email
+const userLookUpWithEmail = (email, database) => {
+  for (const user in database) {
+    if (email === database[user].email) {
+      return database[user];
+    }
+  }
+  return null;
+};
+
+// Function to show the URLs in 'output' for each user
+const urlsForUser = function(id,database) {
   let output = {};
-  for (let url in database) {
+  for (const url in database) {
     if (database[url].userID === id) {
-      console.log('hello')
-      output[url] = database[url]
+      output[url] = database[url];
     }
   }
   return output;
 };
 
-module.exports = {generateRandomString, userLookUpWithEmail, urlsForUser}
+module.exports = {generateRandomString, userLookUpWithEmail, urlsForUser};
